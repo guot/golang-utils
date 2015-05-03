@@ -2,22 +2,28 @@
 package sutils
 
 import (
+	"bufio"
 	"bytes"
 	"fmt"
+	"reflect"
 	"strconv"
 )
 
-func ValueOf(val interface{}) (str string) {
-	switch  val.(type) {
-	case bool:
-		str = strconv.FormatBool(val.(bool))
-	case int:
-		str = strconv.Itoa(val.(int))
-	case float32:
+const endLine = "\r\n"
 
-		str = strconv.FormatFloat(float64(val.(float32)), 'f', -1, 32)
-	case string:
-		str = val.(string)
+func ValueOf(v interface{}) (str string) {
+
+	val := reflect.ValueOf(v)
+	switch val.Kind() {
+	case reflect.Bool:
+		str = strconv.FormatBool(val.Bool())
+	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+		str = strconv.Itoa(int(val.Int()))
+	case reflect.Float32, reflect.Float64:
+
+		str = strconv.FormatFloat(val.Float(), 'f', -1, 32)
+	case reflect.String:
+		str = val.String()
 	default:
 		str = ""
 		fmt.Println("unknown type!")
@@ -26,6 +32,11 @@ func ValueOf(val interface{}) (str string) {
 	return str
 }
 func AppendToNewLine(buf *bytes.Buffer, val interface{}) {
-	buf.WriteString(ValueOf(val))
-	buf.WriteString("\r\n")
+	//	 strconv.AppendInt(buf,val.(int),10)
+	wr := bufio.NewWriter(buf)
+	fmt.Fprintf(wr, "%d\r\n", val.(int))
+	wr.Flush()
+	//	str = buf.String()
+	//	buf.Write([]byte(ValueOf(val)))
+	//	buf.WriteString(endLine)
 }
